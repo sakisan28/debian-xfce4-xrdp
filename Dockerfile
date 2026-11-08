@@ -18,10 +18,13 @@ ENV LC_ALL=ja_JP.UTF-8
 RUN apt-get update && apt-get install -y \
     tzdata \
     locales \
-    task-japanese \
-    task-japanese-desktop \
+#    task-japanese \
+#    task-japanese-desktop \
+    fonts-ipafont \
+    fonts-vlgothic \
     fonts-noto-cjk \
     fcitx5 fcitx5-mozc fcitx5-configtool \
+    firefox-esr-l10n-ja \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && echo "Asia/Tokyo" > /etc/timezone \
     && echo "ja_JP.UTF-8 UTF-8" > /etc/locale.gen \
