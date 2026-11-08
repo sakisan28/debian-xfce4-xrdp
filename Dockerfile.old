@@ -1,0 +1,48 @@
+FROM debian:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 必要パッケージのインストール（xrdp-vnc が入らないように明示的排除）
+RUN apt-get update && apt-get install -y \
+    xfce4 \
+    xfce4-goodies \
+    xrdp \
+    xorgxrdp \
+    xinit \
+    sudo \
+    dbus-x11 \
+#    && apt-get purge -y xrdp-vnc vnc4server tightvncserver \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Xorg の実行権限を緩和
+RUN sed -i 's/allowed_users=console/allowed_users=anybody/' /etc/X11/Xwrapper.config
+
+# 【変更】xrdp.ini から Xorg 以外のセッション定義を完全に抹消する
+# 念のため、デフォルトのセッションタイプも Xorg に固定
+RUN sed -i 's/xsessions=.*$/xsessions=Xorg/' /etc/xrdp/xrdp.ini && \
+    sed -i '/\[Xvnc\]/,/^$/d' /etc/xrdp/xrdp.ini && \
+    sed -i '/\[vnc-any\]/,/^$/d' /etc/xrdp/xrdp.ini && \
+    sed -i '/\[xrdp-any\]/,/^$/d' /etc/xrdp/xrdp.ini && \
+    sed -i '/\[xrdp1\]/,/^$/d' /etc/xrdp/xrdp.ini
+
+# ユーザー作成
+RUN useradd -m -s /bin/bash user && \
+    echo "user:password" | chpasswd && \
+    adduser user sudo
+
+# xrdp をグループに追加
+RUN adduser xrdp ssl-cert
+
+# Xfce起動用のセッションファイルを配置
+RUN echo "startxfce4" > /home/user/.xsession && \
+    echo "startxfce4" > /home/user/.xsessionrc && \
+    chown -R user:user /home/user/
+
+# xrdp の環境変数バグをクリアする対策
+RUN sed -i '1a unset DBUS_SESSION_BUS_ADDRESS\nunset XDG_RUNTIME_DIR' /etc/xrdp/startwm.sh
+
+EXPOSE 3389
+
+# dbus と xrdp を起動
+CMD service dbus start && service xrdp start && tail -f /dev/null
