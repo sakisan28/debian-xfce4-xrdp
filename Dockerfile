@@ -40,4 +40,4 @@ RUN useradd -m -s /bin/bash user && \
 EXPOSE 3389
 
 # dbus と xrdp を起動
-CMD service dbus start && xrdp-sesman && xrdp && tail -f /dev/null
+CMD rm -f /var/run/dbus/pid && rm -f /var/run/xrdp/*.pid && service dbus start && xrdp-sesman && xrdp && tail -f /dev/null
