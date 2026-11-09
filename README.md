@@ -11,3 +11,15 @@
 データーを残したい場合は `./stop.sh`, `./start.sh` を使ってください
 
 本当に永続化する場合は docker commit だけど、Dockerfile を書き換えるほうがベターだよね。
+
+
+
+### KDE Plasma の場合
+
+Dockerfile までは作ってないけど、この環境で xfce4 で一度ログインして `sudo apt install kde-plasma-desktop`して
+```
+echo "startplasma-x11" > ~/.xsession
+chmod +x .xsession
+```
+
+`stop.sh` して `start.sh` すると、KDE Plasma も使えます。
